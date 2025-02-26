@@ -1,0 +1,1 @@
+ollama create unitTUMCodeLlamaV1 -f ./Modelfile

@@ -1,0 +1,68 @@
+## Training Parameters
+
+### Dataset and Batch Configuration
+
+- **Dataset size**: `12,480`
+- **Per-device train batch size**: `2`
+- **Gradient accumulation steps**: `2`
+- **Number of GPUs**: `1`
+- **Effective batch size**: `per_device_train_batch_size * gradient_accumulation_steps * num_gpus`
+- **Steps per epoch**: `dataset_size // effective_batch_size`
+
+### Training Arguments
+
+- **Batch Parameters**:
+  - Per-device train batch size: `2`
+  - Per-device eval batch size: `4` (double train batch size)
+  - Gradient accumulation steps: `2`
+
+- **Optimizer and Learning Rate**:
+  - Optimizer: `"paged_adamw_32bit"`
+  - Learning rate: `2e-4`
+  - FP16: `True`
+  - Max gradient norm: `0.3`
+  - Warmup ratio: `0.05`
+  - LR scheduler type: `"cosine"`
+
+- **Training Duration**:
+  - Number of epochs: `2`
+
+- **Evaluation and Logging**:
+  - Evaluation strategy: `"steps"`
+  - Evaluation steps: `steps_per_epoch // 5` (5 evaluations per epoch)
+  - Logging strategy: `"steps"`
+  - Logging steps: `steps_per_epoch // 5`
+
+- **Checkpointing**:
+  - Save strategy: `"steps"`
+  - Save steps: `steps_per_epoch // 5`
+  - Save total limit: `2` (retain last 2 checkpoints)
+  - Save in SafeTensors format: `True`
+
+- **Output and Reporting**:
+  - Output directory: `"./resources/tensorboard"`
+  - Report to: `"tensorboard"`
+  - Run name: `"falcon7b_finetuning"`
+
+- **Miscellaneous**:
+  - Group by length: `True`
+  - Gradient checkpointing: `True`
+  - Seed: `42`
+  - Max sequence length: `512`
+
+### Trainer Initialization
+
+The `SFTTrainer` is initialized with the following:
+
+- **Model**: `model`
+- **Training arguments**: `training_args`
+- **Train dataset**: `train_dataset["train"]`
+- **Eval dataset**: `evaluation_dataset["validation"]`
+- **Tokenizer**: `tokenizer`
+- **LoRA Configuration**: `lora_config`
+- **Dataset text field**: `"text"`
+- **Max sequence length**: `512`
+
+## Areas of Improvement
+
+1. Conversion file: the model can´t be converted with the llama.cpp script `llama.cpp/convert_hf_to_gguf.py` to a gguf file, because the falcon architecture is different from the one supported by the script (Llama-based architecture) ==> we eliminate Falcon in our finetuning process
